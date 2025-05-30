@@ -13,11 +13,15 @@ st.set_page_config(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-def get_openrouter_response(messages, model="openai/gpt-3.5-turbo"):
+def get_openrouter_response(messages, model="openai/gpt-3.5-turbo", temperature=0.7, max_tokens=1000):
     """Send request to OpenRouter API and get response"""
     try:
-        # Get API key from Streamlit secrets
-        api_key = st.secrets["OPENROUTER_API_KEY"]
+        # Get API key from session state
+        if "api_key" not in st.session_state or not st.session_state.api_key:
+            st.error("❌ Please enter your API key in the sidebar first.")
+            return None
+            
+        api_key = st.session_state.api_key
         
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -29,8 +33,8 @@ def get_openrouter_response(messages, model="openai/gpt-3.5-turbo"):
         data = {
             "model": model,
             "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 1000
+            "temperature": temperature,
+            "max_tokens": max_tokens
         }
         
         response = requests.post(
@@ -47,9 +51,6 @@ def get_openrouter_response(messages, model="openai/gpt-3.5-turbo"):
             st.error(f"API Error: {response.status_code} - {response.text}")
             return None
             
-    except KeyError:
-        st.error("❌ API key not found in secrets.toml. Please add OPENROUTER_API_KEY to your secrets file.")
-        return None
     except requests.exceptions.RequestException as e:
         st.error(f"❌ Network error: {str(e)}")
         return None
@@ -61,9 +62,27 @@ def get_openrouter_response(messages, model="openai/gpt-3.5-turbo"):
 st.title("🤖 OpenRouter Chatbot")
 st.markdown("Chat with AI models through OpenRouter API")
 
-# Sidebar for model selection
+# Sidebar for API key and settings
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.header("🔑 API Configuration")
+    
+    # API Key input
+    api_key_input = st.text_input(
+        "Enter OpenRouter API Key:",
+        type="password",
+        placeholder="sk-or-v1-...",
+        help="Enter your OpenRouter API key"
+    )
+    
+    # Store API key in session state
+    if api_key_input:
+        st.session_state.api_key = api_key_input
+        st.success("✅ API Key entered successfully!")
+    elif "api_key" not in st.session_state:
+        st.warning("⚠️ Please enter your API key to start chatting")
+    
+    st.markdown("---")
+    st.header("⚙️ Model Settings")
     
     # Model selection
     model_options = {
@@ -81,13 +100,40 @@ with st.sidebar:
         index=0
     )
     
+    # Temperature slider
+    temperature = st.slider(
+        "Temperature:",
+        min_value=0.0,
+        max_value=2.0,
+        value=0.7,
+        step=0.1,
+        help="Controls randomness. Lower = more focused, Higher = more creative"
+    )
+    
+    # Max tokens slider
+    max_tokens = st.slider(
+        "Max Tokens:",
+        min_value=100,
+        max_value=4000,
+        value=1000,
+        step=100,
+        help="Maximum length of the response"
+    )
+    
+    st.markdown("---")
+    st.header("🗑️ Chat Management")
+    
     # Clear chat button
-    if st.button("🗑️ Clear Chat", use_container_width=True):
+    if st.button("Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
     
-    # Display current model
-    st.info(f"**Current Model:** {selected_model}")
+    # Display current settings
+    st.markdown("---")
+    st.header("📊 Current Settings")
+    st.info(f"**Model:** {selected_model}")
+    st.info(f"**Temperature:** {temperature}")
+    st.info(f"**Max Tokens:** {max_tokens}")
 
 # Display chat history
 chat_container = st.container()
@@ -98,6 +144,11 @@ with chat_container:
 
 # Chat input
 if prompt := st.chat_input("Type your message here..."):
+    # Check if API key is provided
+    if "api_key" not in st.session_state or not st.session_state.api_key:
+        st.error("⚠️ Please enter your OpenRouter API key in the sidebar first!")
+        st.stop()
+    
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     
@@ -113,7 +164,9 @@ if prompt := st.chat_input("Type your message here..."):
             
             response = get_openrouter_response(
                 api_messages, 
-                model_options[selected_model]
+                model_options[selected_model],
+                temperature,
+                max_tokens
             )
             
             if response:
