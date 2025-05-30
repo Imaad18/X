@@ -25,3 +25,21 @@
    ```bash
    git clone https://github.com/yourusername/ai-neural-interface.git
    cd ai-neural-interface
+
+2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+3. Run Application
+```bash
+streamlit run app.py
+```
+
+* Enter your Groq API key in the sidebar
+
+* Select your preferred model and parameters
+
+* Start chatting with the AI
+
+
