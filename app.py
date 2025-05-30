@@ -255,61 +255,33 @@ def initialize_session_state():
 def get_model_info():
     """Extended model information with pricing and capabilities"""
     return {
-        "GPT-4 Turbo": {
-            "id": "openai/gpt-4-turbo",
-            "description": "Most capable GPT-4 model",
-            "context": "128K tokens",
-            "price": "$10/1M tokens",
+        "Llama 3 70B": {
+            "id": "llama3-70b-8192",
+            "description": "Meta's most capable Llama 3 model",
+            "context": "8K tokens",
+            "price": "Free",
             "category": "Premium"
         },
-        "GPT-3.5 Turbo": {
-            "id": "openai/gpt-3.5-turbo",
-            "description": "Fast and efficient",
-            "context": "16K tokens",
-            "price": "$0.5/1M tokens",
+        "Llama 3 8B": {
+            "id": "llama3-8b-8192",
+            "description": "Fast and efficient Llama 3 model",
+            "context": "8K tokens",
+            "price": "Free",
             "category": "Standard"
         },
-        "Claude 3.5 Sonnet": {
-            "id": "anthropic/claude-3.5-sonnet",
-            "description": "Anthropic's best model",
-            "context": "200K tokens",
-            "price": "$3/1M tokens",
+        "Mixtral 8x7B": {
+            "id": "mixtral-8x7b-32768",
+            "description": "High-quality mixture of experts model",
+            "context": "32K tokens",
+            "price": "Free",
             "category": "Premium"
         },
-        "Claude 3 Haiku": {
-            "id": "anthropic/claude-3-haiku",
-            "description": "Fast and affordable",
-            "context": "200K tokens",
-            "price": "$0.25/1M tokens",
+        "Gemma 7B": {
+            "id": "gemma-7b-it",
+            "description": "Google's lightweight model",
+            "context": "8K tokens",
+            "price": "Free",
             "category": "Economy"
-        },
-        "Llama 3.1 405B": {
-            "id": "meta-llama/llama-3.1-405b-instruct",
-            "description": "Meta's largest model",
-            "context": "32K tokens",
-            "price": "$3/1M tokens",
-            "category": "Premium"
-        },
-        "Gemini Pro": {
-            "id": "google/gemini-pro",
-            "description": "Google's advanced model",
-            "context": "32K tokens",
-            "price": "$0.5/1M tokens",
-            "category": "Standard"
-        },
-        "Mistral Large": {
-            "id": "mistralai/mistral-large",
-            "description": "Mistral's flagship model",
-            "context": "32K tokens",
-            "price": "$8/1M tokens",
-            "category": "Premium"
-        },
-        "Cohere Command R+": {
-            "id": "cohere/command-r-plus",
-            "description": "Enterprise-grade model",
-            "context": "128K tokens",
-            "price": "$3/1M tokens",
-            "category": "Premium"
         }
     }
 
@@ -317,7 +289,7 @@ def estimate_tokens(text: str) -> int:
     """Rough token estimation"""
     return len(text.split()) * 1.3
 
-def get_openrouter_response(messages, model="openai/gpt-3.5-turbo", temperature=0.7, max_tokens=1000):
+def get_groq_response(messages, model="llama3-70b-8192", temperature=0.7, max_tokens=1000):
     """Enhanced API call with better error handling and stats tracking"""
     start_time = time.time()
     
@@ -331,8 +303,6 @@ def get_openrouter_response(messages, model="openai/gpt-3.5-turbo", temperature=
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://streamlit-chatbot.local",
-            "X-Title": "AI Neural Interface"
         }
         
         data = {
@@ -344,7 +314,7 @@ def get_openrouter_response(messages, model="openai/gpt-3.5-turbo", temperature=
         }
         
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            "https://api.groq.com/openai/v1/chat/completions",
             headers=headers,
             json=data,
             timeout=60
@@ -493,10 +463,10 @@ def main():
         st.markdown("#### 🔑 Neural Link Authentication")
         
         api_key_input = st.text_input(
-            "OpenRouter API Key:",
+            "Groq API Key:",
             type="password",
-            placeholder="sk-or-v1-...",
-            help="Your OpenRouter API key for neural network access"
+            placeholder="gsk_...",
+            help="Your Groq API key for neural network access"
         )
         
         if api_key_input:
@@ -635,7 +605,7 @@ def main():
             # Prepare API messages
             api_messages = st.session_state.messages[-30:]  # Keep last 30 messages
             
-            response = get_openrouter_response(
+            response = get_groq_response(
                 api_messages,
                 model_info[selected_model]["id"],
                 temperature,
@@ -665,7 +635,7 @@ def main():
     <div style='text-align: center; color: #00d4ff; font-family: Orbitron, monospace;'>
         <h4>🚀 AI Neural Interface v2.0</h4>
         <p style='color: rgba(255,255,255,0.7);'>
-            Powered by OpenRouter API • Enhanced Neural Architecture • Built with Streamlit
+            Powered by Groq API • Enhanced Neural Architecture • Built with Streamlit
         </p>
         <p style='color: rgba(0,212,255,0.8); font-size: 0.9rem;'>
             🔬 Advanced AI Communication Platform • 🌐 Multi-Model Support • 📊 Real-time Analytics
