@@ -1,3 +1,9 @@
+![scrnli_TfAx6I3xUSYz45](https://github.com/user-attachments/assets/b5507023-1fd6-455c-ad16-ba7590fb0afc)
+
+
+# Live Demo in Web App:
+https://ai-neural-interface-atg7jrykm7r99uzbnsrugn.streamlit.app/
+
 # AI Neural Interface
 
 * A futuristic AI chat interface powered by Groq's ultra-fast LLM inference, featuring multiple model support, real-time analytics, and a cyberpunk-inspired UI.
